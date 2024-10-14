@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import csv
 import os
 
@@ -56,20 +57,16 @@ with open(output_file, 'w', newline='') as f_write:
         csv_writer.writerow(row)
 
 
-def plot_a_line(x_values, y_values, data, formula, line_label,  classification_index):
+def plot_a_line(x_values, y_values, data, formula, line_label, classification_index):
+    x_values = np.array(x_values)
+    y_values = np.array(y_values)
+    classifications = np.array([row[classification_index] for row in data])
+  
+    plt.scatter(x_values[classifications == 1], y_values[classifications == 1], color='blue', label='Ovanför')
+    plt.scatter(x_values[classifications == 0], y_values[classifications == 0], color='red', label='Nedanför')
 
-    for i in range(len(data)):
-        if data[i][classification_index] == 1:
-            plt.scatter(x_values[i], y_values[i], color='blue', label='Ovanför' if i == 0 else "")
-        else:
-            plt.scatter(x_values[i], y_values[i], color='red', label='Nedanför' if i == 0 else "")
-
-    y_min = formula(min_x)
-    y_max = formula(max_x)
-
-
-    plt.plot([min_x, max_x], [y_min, y_max], color="black", label=line_label)
-
+    min_x, max_x = x_values.min(), x_values.max()
+    plt.plot([min_x, max_x], [formula(min_x), formula(max_x)], color='black', label=line_label)
 
     plt.xlabel('x')
     plt.ylabel('y')
@@ -77,6 +74,42 @@ def plot_a_line(x_values, y_values, data, formula, line_label,  classification_i
     plt.legend()
     plt.show()
 
+def compare_classifications(data):
+    comparisons = {
+        "y_eq_x vs f": 0,
+        "y_eq_x vs g": 0,
+        "y_eq_x vs h": 0,
+        "f vs g": 0,
+        "f vs h": 0,
+        "g vs h": 0,
+    }
+    total_points = len(data)
+    
+    for row in data:
+        label_y_eq_x, label_f, label_g, label_h = row[2], row[3], row[4], row[5]
+        
+
+        if label_y_eq_x != label_f:
+            comparisons["y_eq_x vs f"] += 1
+        if label_y_eq_x != label_g:
+            comparisons["y_eq_x vs g"] += 1
+        if label_y_eq_x != label_h:
+            comparisons["y_eq_x vs h"] += 1
+        if label_f != label_g:
+            comparisons["f vs g"] += 1
+        if label_f != label_h:
+            comparisons["f vs h"] += 1
+        if label_g != label_h:
+            comparisons["g vs h"] += 1
+
+
+    print("Skillnader i klassificeringar:")
+    for key, value in comparisons.items():
+        percentage_difference = (value / total_points) * 100
+        print(f"{key}: {value} punkter skiljer sig ({percentage_difference:.2f}%)")
+
+
+compare_classifications(data)
 
 
 # y = x 
@@ -90,3 +123,4 @@ plot_a_line(x_values, y_values, data, lambda x: -2 * x + 0.16, 'g(x) = -2x + 0.1
 
 # h(x) = 800x - 120 
 plot_a_line(x_values, y_values, data, lambda x: 800 * x - 120, 'h(x) = 800x - 120', 5)
+
