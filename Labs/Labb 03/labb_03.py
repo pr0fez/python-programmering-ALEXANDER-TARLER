@@ -13,37 +13,33 @@ x_values = []
 y_values = []
 data = []
 
-# y = x
-def classify_datapoint_y_eq_x(x, y):
-    return 1 if y > x else 0
+lines = {
+    'y = x': (1, 0),
+    'f(x) = -0.489x': (-0.489, 0),
+    'g(x) = -2x + 0.16': (-2, 0.16),
+    'h(x) = 800x - 120': (800, -120)
+}
 
-# f(x) = -0.489x
-def classify_datapoint_f(x, y):
-    return 1 if y > -0.489 * x else 0
-
-# g(x) = -2x + 0.16
-def classify_datapoint_g(x, y):
-    return 1 if y > -2 * x + 0.16 else 0
-
-# h(x) = 800x - 120
-def classify_datapoint_h(x, y):
-    return 1 if y > 800 * x - 120 else 0
+def classify_datapoints(x, y, k, m):
+    return 1 if y > k * x + m else 0
 
 
 with open(input_file) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
+    
     for row in csv_reader:
         x, y = float(row[0]), float(row[1])
-
-        label_y_eq_x = classify_datapoint_y_eq_x(x, y)
-        label_f = classify_datapoint_f(x, y)
-        label_g = classify_datapoint_g(x, y)
-        label_h = classify_datapoint_h(x, y)
+        
+        labels = []
+        for k, m in lines.values():
+            label = classify_datapoints(x, y, k, m)
+            labels.append(label)
         
         x_values.append(x)
         y_values.append(y)
 
-        data.append([x, y, label_y_eq_x, label_f, label_g, label_h])
+
+        data.append([x, y] + labels)
 
 
 min_x = min(x_values)
